@@ -1,0 +1,92 @@
+import pandas as pd
+import numpy as np
+from scipy.sparse import csr_matrix
+
+def scATAC_build_metadata(snvMatrix, peakMatrix, snp_position_df, peak_position_df,
+                           snv_number_of_cells=5, peak_min=1, peak_number_of_cells=5,
+                           distance_threshold=100000):
+    """
+    Optimized for large matrices.
+    """
+
+
+    snv_cells = list(snvMatrix.columns)
+    peak_cells = list(peakMatrix.columns)
+    common_cells = list(set(snv_cells).intersection(set(peak_cells)))
+
+    if len(common_cells) == 0:
+        raise ValueError('No common cells between SNV Matrix and Peak Matrix!')
+
+    # Retain only common cells
+    snvMatrix = snvMatrix[common_cells]
+    peakMatrix = peakMatrix[common_cells]
+
+
+    snv_list = snvMatrix.index
+    peak_list = peakMatrix.index
+    metadata = {
+        "SNPid": [],
+        "Num_cells_ref": [],
+        "Num_cells_alt": [],
+        "Ref_cells": [],
+        "Alt_cells": [],
+        "PeakList": [],
+        "Num_peak": [],
+        "CellList": []
+    }
+
+    snvMatrix_sparse = csr_matrix(snvMatrix.values)
+    peakMatrix_sparse = csr_matrix(peakMatrix.values)
+
+
+    for snv_idx, snvid in enumerate(snv_list):
+        # Extract REF and ALT cells
+        snv_row = snvMatrix_sparse.getrow(snv_idx).toarray().flatten()
+        ref_cells = np.where(snv_row == 0)[0]
+        alt_cells = np.where(snv_row == 1)[0]
+
+        if len(ref_cells) >= snv_number_of_cells and len(alt_cells) >= snv_number_of_cells:
+            # Valid SNP
+            valid_peaks = []
+            for peak_idx, peak_id in enumerate(peak_list):
+                peak_row = peakMatrix_sparse.getrow(peak_idx).toarray().flatten()
+
+                # Calculate number of valid cells for REF and ALT
+                valid_ref_cells = np.sum(peak_row[ref_cells] > peak_min)
+                valid_alt_cells = np.sum(peak_row[alt_cells] > peak_min)
+
+                if valid_ref_cells >= peak_number_of_cells and valid_alt_cells >= peak_number_of_cells:
+                    valid_peaks.append(peak_id)
+
+    
+            if len(valid_peaks) > 0:
+                snp_info = snp_position_df[snp_position_df['SNPid'] == snvid]
+                if snp_info.empty:
+                    continue
+
+                snp_chr = snp_info['chr'].values[0]
+                snp_pos = snp_info['position'].values[0]
+
+                # Compute nearby peaks
+                peak_position_df['Position'] = (peak_position_df['start'] + peak_position_df['end']) / 2
+                nearby_peaks = peak_position_df[
+                    (peak_position_df['chr'] == snp_chr) &
+                    (abs(peak_position_df['Position'] - snp_pos) <= distance_threshold)
+                ]['peak_ID'].values
+
+          
+                valid_nearby_peaks = list(set(valid_peaks).intersection(set(nearby_peaks)))
+
+                if len(valid_nearby_peaks) > 0:
+                    metadata["SNPid"].append(snvid)
+                    metadata["Num_cells_ref"].append(len(ref_cells))
+                    metadata["Num_cells_alt"].append(len(alt_cells))
+                    metadata["Ref_cells"].append(",".join(map(str, ref_cells)))
+                    metadata["Alt_cells"].append(",".join(map(str, alt_cells)))
+                    metadata["PeakList"].append(",".join(valid_nearby_peaks))
+                    metadata["Num_peak"].append(len(valid_nearby_peaks))
+                    metadata["CellList"].append(",".join(map(str, np.concatenate((ref_cells, alt_cells)))))
+
+    snv_peak_metadata = pd.DataFrame(metadata)
+
+    return snv_peak_metadata
