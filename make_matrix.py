@@ -8,7 +8,7 @@ import pandas as pd
 from collections import defaultdict
 import subprocess
 
-#for file in /data01/home/zhaogefei/eqtl/pbmc_1k/snp_out filtered snps
+
 snp_folder = "~/snp_out/"
 output_folder = "~/snp_out_filtered/"
 os.makedirs(output_folder, exist_ok=True)
