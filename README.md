@@ -1,6 +1,6 @@
 # sc_caQTL
 
-Call sc_caQTL based on single cell ATAC-seq data.
+A statistical method for single cell chromatin accessibility QTL mapping based on scATAC-seq data.
 
 
 Introduction
@@ -40,7 +40,7 @@ pip install ______
 
 #### From Fastq files to Bam files; SNV calling from Bam files
 
-Check  -   `pre.sh`
+Check  -   `GATK_usage.ipynb`
 
 
 ### Step1: Build SNV metadata pairs
@@ -97,9 +97,6 @@ The structure should be like:
     |
     |─── peak_matrix
     |   │─── cell_level_files
-    |   |   │  cell_type1_matrix.csv
-    |   |   │  cell_type2_matrix.csv
-    |   |   | ...
     |   
     |─── snv
     |   |─── cell_level_snv
