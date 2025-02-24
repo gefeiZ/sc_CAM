@@ -94,7 +94,6 @@ The structure should be like:
     |   |   │  cell_2.bam
     |   |   │  cell_2.bam.bai
     |   |   | ...
-    |
     |─── peak_matrix
     |   │─── cell_level_files
     |   
@@ -112,10 +111,8 @@ The structure should be like:
     |   |   │      cell_2_filtered_pass.vcf
     |   |   |      cell_2_filtered_pass.vcf.idx
     |   |   |  ...
-    |   |   |
     |   |─── snv_matrix
     |   |   │  celltype1_SNV_matrix.csv
     |   |   │  celltype2_SNV_matrix.csv
     |   |   |  ...
-    |   |   |
-    
+
