@@ -1,6 +1,6 @@
-# sc_caQTL
+# sc_CAM
 
-A statistical method for single cell chromatin accessibility QTL mapping based on scATAC-seq data.
+A statistical method for single cell Chromatin Accessibility QTL Mapping based on scATAC-seq data.
 
 
 Introduction
@@ -12,7 +12,7 @@ A python package for **discovering sc_caQTL with single cell ATAC-seq data, with
 Installation
 ------------
 
-pip install ______
+pip install sc_CAM
 
 ------------
 
@@ -73,8 +73,10 @@ Format of caQTL Result,
     significant eQTL effect on the target gene
 
 
-
-
+## Running sc_CAM on example data:
+1.Download the sc_CAM from Pypi
+2.Download the required annotation data from Zenodo
+3.Follow the usage instruction
 
 The structure should be like:
 ------------
@@ -94,9 +96,6 @@ The structure should be like:
     |   |   │  cell_2.bam
     |   |   │  cell_2.bam.bai
     |   |   | ...
-    |─── peak_matrix
-    |   │─── cell_level_files
-    |   
     |─── snv
     |   |─── cell_level_snv
     |   |   |─── cell_type1
@@ -115,4 +114,7 @@ The structure should be like:
     |   |   │  celltype1_SNV_matrix.csv
     |   |   │  celltype2_SNV_matrix.csv
     |   |   |  ...
-
+    |   |─── snv_meta
+    |   |   |  celltype1_SNV_meta.csv
+    |   |   |  ...
+    |─── QTLs
