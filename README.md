@@ -74,9 +74,13 @@ Format of caQTL Result,
 
 
 ## Running sc_CAM on example data:
+
 1.Download the sc_CAM from Pypi
+
 2.Download the required annotation data from Zenodo
+
 3.Follow the usage instruction
+
 
 The structure should be like:
 ------------
