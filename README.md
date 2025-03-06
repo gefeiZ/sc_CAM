@@ -77,7 +77,7 @@ Format of caQTL Result,
 
 1.Download the sc_CAM from Pypi
 
-2.Download the required annotation data from Zenodo
+2.Download the toy data from Zenodo
 
 3.Follow the usage instruction
 
