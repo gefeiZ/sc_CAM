@@ -6,7 +6,7 @@ A statistical method for single cell Chromatin Accessibility QTL Mapping based o
 Introduction
 ------------
 
-A python package for **discovering sc_caQTL with single cell ATAC-seq data, without WGS or WES data**. 
+A python package for **discovering caQTL with single cell ATAC-seq data, without WGS or WES data**. 
 
 
 Installation
