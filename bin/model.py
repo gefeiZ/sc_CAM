@@ -3,10 +3,7 @@ import pandas as pd
 from scipy.stats import chi2
 from statsmodels.genmod.generalized_linear_model import GLM
 from statsmodels.genmod.families import NegativeBinomial
-import numpy as np
-import pandas as pd
 import statsmodels.api as sm
-from scipy.stats import chi2
 from statsmodels.tools import add_constant
 from statsmodels.stats.multitest import multipletests
 
