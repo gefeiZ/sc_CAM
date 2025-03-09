@@ -11,7 +11,7 @@ from statsmodels.tools import add_constant
 from statsmodels.stats.multitest import multipletests
 
 def callQTL(peakMatrix, snv_peak_pair_metadata, p_adjust_method="fdr_bh", zero_threshold=0.5, overdispersion_threshold=0.1):
-    # Invalid input control
+
     if not isinstance(peakMatrix, (pd.DataFrame, np.ndarray)):
         raise ValueError("Wrong data type of 'peakMatrix'")
     if pd.isna(peakMatrix).any().any():
@@ -64,7 +64,7 @@ def callQTL(peakMatrix, snv_peak_pair_metadata, p_adjust_method="fdr_bh", zero_t
             zero_proportion_1 = np.mean(counts_1 == 0)
             zero_proportion_2 = np.mean(counts_2 == 0)
 
-            # 计算过度离散性
+
             def calculate_overdispersion(counts):
                 mean_counts = np.mean(counts)
                 var_counts = np.var(counts)
@@ -74,10 +74,10 @@ def callQTL(peakMatrix, snv_peak_pair_metadata, p_adjust_method="fdr_bh", zero_t
             overdispersion_2 = calculate_overdispersion(counts_2)
 
             if zero_proportion_1 > zero_threshold or zero_proportion_2 > zero_threshold or overdispersion_1 > overdispersion_threshold or overdispersion_2 > overdispersion_threshold:
-                # Fit ZIP model for both groups
+        
                 try:
-                    fit_1 = ZeroInflatedPoisson(counts_1, np.ones((len(counts_1), 1))).fit(disp=False)
-                    fit_2 = ZeroInflatedPoisson(counts_2, np.ones((len(counts_2), 1))).fit(disp=False)
+                    fit_1 = sm.ZeroInflatedPoisson(counts_1, np.ones((len(counts_1), 1))).fit(disp=False)
+                    fit_2 = sm.ZeroInflatedPoisson(counts_2, np.ones((len(counts_2), 1))).fit(disp=False)
                     theta_1 = fit_1.params[0]
                     lambda_1 = np.exp(fit_1.params[1])
                     theta_2 = fit_2.params[0]
@@ -85,7 +85,7 @@ def callQTL(peakMatrix, snv_peak_pair_metadata, p_adjust_method="fdr_bh", zero_t
                     
                     logL_full = fit_1.llf + fit_2.llf
                     combined_counts = np.concatenate([counts_1, counts_2])
-                    combined_fit = ZeroInflatedPoisson(combined_counts, np.ones_like(combined_counts)).fit(disp=False)
+                    combined_fit = sm.ZeroInflatedPoisson(combined_counts, np.ones_like(combined_counts)).fit(disp=False)
                     logL_null = combined_fit.llf
                     
                     chi2LR1 = 2 * (logL_full - logL_null)
@@ -104,7 +104,7 @@ def callQTL(peakMatrix, snv_peak_pair_metadata, p_adjust_method="fdr_bh", zero_t
                     results_SNV.append(results_peak)
                     continue
             else:
-                # Fit Negative Binomial model for both groups
+               
                 try:
                     fit_1 = NegativeBinomial(counts_1, np.ones((len(counts_1), 1))).fit(disp=False)
                     fit_2 = NegativeBinomial(counts_2, np.ones((len(counts_2), 1))).fit(disp=False)
@@ -145,10 +145,9 @@ def callQTL(peakMatrix, snv_peak_pair_metadata, p_adjust_method="fdr_bh", zero_t
 
     results_df = pd.DataFrame(results)
     
-    # Adjust p-values
+
     results_df["adjusted_pvalue"] = multipletests(results_df["pvalue"], method=p_adjust_method)[1]
-    
-    # Rename columns for better understanding
+
     results_df.rename(columns={
         'sample_size_1': 'sample_size_Ref',
         'sample_size_2': 'sample_size_Alt',
