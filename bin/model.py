@@ -8,6 +8,66 @@ from statsmodels.tools import add_constant
 from statsmodels.stats.multitest import multipletests
 
 def callQTL(peakMatrix, snv_peak_pair_metadata, p_adjust_method="fdr_bh", zero_threshold=0.5, overdispersion_threshold=0.1):
+    
+    """
+    Perform caQTL analysis by testing association between SNP genotypes (Ref/Alt groups)
+    and single-cell ATAC-seq peak accessibility using either Zero-Inflated Poisson (ZIP)
+    or Negative Binomial (NB) regression, followed by multiple testing correction.
+
+    Parameters
+    ----------
+    peakMatrix : pandas.DataFrame
+        A peak-by-cell count matrix (accessibility), where rows are peak IDs and columns are cell barcodes.
+        All values must be non-negative integers. Matrix must not contain NaNs.
+
+    snv_peak_pair_metadata : pandas.DataFrame
+        Metadata for SNP-peak pairs to test. Must contain the following columns:
+            - 'SNVid': SNP identifier.
+            - 'CellList': comma-separated string of all relevant cells for this SNP.
+            - 'Ref_cells': comma-separated string of cell barcodes with reference allele.
+            - 'Alt_cells': comma-separated string of cell barcodes with alternative allele.
+            - 'PeakList': comma-separated string of peaks to be tested for this SNP.
+
+    p_adjust_method : str, optional (default="fdr_bh")
+        Method for multiple testing correction. Options include:
+            - "fdr_bh" (Benjamini-Hochberg)
+            - "bonferroni"
+            - "fdr_by"
+            - Any method supported by `statsmodels.stats.multitest.multipletests`.
+
+    zero_threshold : float, optional (default=0.5)
+        Threshold for proportion of zero counts. If either group has > `zero_threshold` zeros,
+        a Zero-Inflated Poisson model will be used.
+
+    overdispersion_threshold : float, optional (default=0.1)
+        Threshold for overdispersion (variance > mean). If either group has overdispersion
+        greater than this threshold, ZIP model will be used.
+
+    Returns
+    -------
+    results_df : pandas.DataFrame
+        A long-format DataFrame where each row corresponds to a SNP-peak pair test.
+        Columns include:
+            - 'SNVid', 'Peakid'
+            - sample sizes: 'sample_size_Ref', 'sample_size_Alt'
+            - means: 'total_mean_Ref', 'total_mean_Alt'
+            - fitted parameters: ('theta', 'mu', or 'size') for both Ref and Alt groups
+            - 'chi2LR1': likelihood ratio test statistic
+            - 'pvalue': raw p-value from test
+            - 'adjusted_pvalue': p-value corrected for multiple testing
+            - 'Remark': error message if the test failed (e.g., due to fitting issues)
+
+    Notes
+    -----
+    - The function chooses between ZIP and NB model for each test dynamically,
+      based on zero inflation and overdispersion.
+    - Model comparison is performed using likelihood ratio test (LRT) between group-specific models
+      and a combined (null) model.
+    - p-value adjustment is applied globally across all tested SNP-peak pairs.
+    - Internally uses `statsmodels` for GLM/ZIP fitting and `scipy.stats.chi2.sf` for LRT p-values.
+
+    """
+
 
     if not isinstance(peakMatrix, (pd.DataFrame, np.ndarray)):
         raise ValueError("Wrong data type of 'peakMatrix'")
