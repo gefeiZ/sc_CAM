@@ -1,11 +1,12 @@
-[FigA.pdf](https://github.com/user-attachments/files/21356282/FigA.pdf)# sc_CAM
+# sc_CAM
 
 A statistical method for single cell Chromatin Accessibility QTL Mapping based on scATAC-seq data.
 
 
 Introduction
 ------------
-[FigA.pdf](https://github.com/user-attachments/files/21356285/FigA.pdf)
+<img width="8000" height="5600" alt="FigA" src="https://github.com/user-attachments/assets/3afe7864-0b4d-446e-9294-9bf2442a1f06" />
+
 
 A python package for **discovering caQTL with single cell ATAC-seq data, without WGS or WES data**. 
 
